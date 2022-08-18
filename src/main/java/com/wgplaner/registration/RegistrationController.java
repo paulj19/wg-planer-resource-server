@@ -3,15 +3,18 @@ package com.wgplaner.registration;
 
 import com.wgplaner.entity.User;
 import com.wgplaner.repository.UserRepository;
-import javax.validation.Valid;
-import javax.validation.ValidationException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import javax.validation.Valid;
+import javax.validation.ValidationException;
 
 @Slf4j
 @RestController
@@ -27,7 +30,7 @@ public class RegistrationController {
   }
 
   @PostMapping
-  public ResponseEntity<?> processUserRegistration(@Valid RegistrationDto registrationDto,
+  public ResponseEntity<?> processUserRegistration(@RequestBody @Valid RegistrationDto registrationDto,
       Errors errors) {
     try {
       if (errors.hasErrors()) {
@@ -36,7 +39,7 @@ public class RegistrationController {
       }
       User user = userRepository.save(registrationDto.mapToUser(passwordEncoder));
       log.info("new user registered and saved to DB. User Id " + user.getId());
-      return ResponseEntity.ok(user);
+      return ResponseEntity.status(HttpStatus.CREATED).body(user);
     } catch (ValidationException e) {
       log.warn("new user registration validation failed during DB save ", e);
       return ResponseEntity.unprocessableEntity().body("validation failed during entity save");

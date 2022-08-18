@@ -9,20 +9,18 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.io.Serial;
 import java.util.Collection;
 import java.util.List;
 
-@Data
 @Entity
-@NoArgsConstructor(access = AccessLevel.PRIVATE, force = true)
+@Data
+@NoArgsConstructor(access = AccessLevel.PROTECTED, force = true)
 @RequiredArgsConstructor
+@Table(name="main_user")
 public class User implements UserDetails {
     @Serial
     private static final long serialVersionUID = 1L;

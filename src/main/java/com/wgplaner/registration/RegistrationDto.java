@@ -14,12 +14,14 @@ public class RegistrationDto {
 
     @NotBlank
     private String username;
-    @NotBlank
-    private String password;
     @NotNull
     @NotBlank
     @ValidEmail
     private String email;
+    @NotBlank
+    private String password;
+    @NotBlank
+    private String confirmPassword;
 
     public User mapToUser(PasswordEncoder passwordEncoder) {
         return new User(username, passwordEncoder.encode(password), email);
