@@ -1,4 +1,4 @@
-package com.wgplaner.common.validation.email;
+package com.wgplaner.common.validation;
 
 
 import javax.validation.ConstraintValidator;

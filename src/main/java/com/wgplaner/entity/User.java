@@ -1,6 +1,5 @@
 package com.wgplaner.entity;
 
-import com.wgplaner.common.validation.email.ValidEmail;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -10,17 +9,15 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.*;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
 import java.io.Serial;
 import java.util.Collection;
 import java.util.List;
 
-@Entity
 @Data
+@Entity
+@Table(name="main_user")
 @NoArgsConstructor(access = AccessLevel.PROTECTED, force = true)
 @RequiredArgsConstructor
-@Table(name="main_user")
 public class User implements UserDetails {
     @Serial
     private static final long serialVersionUID = 1L;
@@ -29,14 +26,9 @@ public class User implements UserDetails {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @NotBlank
     private final String username;
-    @NotBlank
     private final String password;
 
-    @NotNull//valid email annotn should take care?
-    @NotBlank
-    @ValidEmail
     private final String email;
 
     @Override
