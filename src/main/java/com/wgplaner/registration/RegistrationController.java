@@ -3,6 +3,7 @@ package com.wgplaner.registration;
 
 import com.wgplaner.entity.User;
 import com.wgplaner.repository.UserRepository;
+import io.micrometer.core.annotation.Timed;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +18,7 @@ import java.util.Map;
 
 @Slf4j
 @RestController
+@Timed
 @RequestMapping("/register")
 public class RegistrationController {
 
@@ -31,10 +33,6 @@ public class RegistrationController {
     @PostMapping
     @Valid
     public ResponseEntity<?> processUserRegistration(@RequestBody @Valid RegistrationDto registrationDto) {
-//        if (errors.hasErrors()) {
-//            log.warn("validation failed for registrationDto. " + errors.getAllErrors());
-//            return ResponseEntity.unprocessableEntity().body(Objects.requireNonNull(errors.getFieldError()).getDefaultMessage());
-//        }
         User user = userRepository.save(registrationDto.mapToUser(passwordEncoder));
         log.info("new user registered and saved to DB. User Id " + user.getId());
         return ResponseEntity.status(HttpStatus.CREATED).body(user);
