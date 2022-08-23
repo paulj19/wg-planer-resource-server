@@ -1,15 +1,18 @@
 package com.wgplaner.registration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
@@ -20,6 +23,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import java.util.List;
 import java.util.stream.Stream;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 
@@ -28,6 +32,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class RegistrationControllerTest {
     @Autowired
     private RegistrationController registrationController;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     private MockMvc mockMvc;
     private RegistrationDto registrationDto;
@@ -45,7 +51,18 @@ public class RegistrationControllerTest {
 
         //assert
         resultActions.andExpect(MockMvcResultMatchers.status().isCreated());
-        resultActions.andExpect(content().string(asJsonString(registrationDto)));
+        String controllerResponse = resultActions.andReturn().getResponse().getContentAsString();
+        String passwordFromResponse = StringUtils.substringBetween(controllerResponse, "\"password\":\"", "\"");
+
+        assertThat(passwordEncoder.matches(registrationDto.password(), passwordFromResponse)).isTrue();
+        assertThat(controllerResponse).contains("\"id\":1");
+        assertThat(controllerResponse).contains("\"username\":" + "\"" + registrationDto.username() + "\"");
+        assertThat(controllerResponse).contains("\"email\":" + "\"" + registrationDto.email() + "\"");
+        assertThat(controllerResponse).contains("\"enabled\":true");
+        assertThat(controllerResponse).contains("\"authorities\":[{\"authority\":\"ROLE_USER\"}]");
+        assertThat(controllerResponse).contains("\"accountNonExpired\":false");
+        assertThat(controllerResponse).contains("\"accountNonLocked\":true");
+        assertThat(controllerResponse).contains("\"credentialsNonExpired\":true");
     }
 
     @ParameterizedTest
@@ -59,7 +76,7 @@ public class RegistrationControllerTest {
         //assert
         resultActions.andExpect(MockMvcResultMatchers.status().isUnprocessableEntity());
         for(String expectedErrorMessage : expectedErrorMessages) {
-            resultActions.andExpect(MockMvcResultMatchers.content().string(containsString(expectedErrorMessage)));
+            resultActions.andExpect(content().string(containsString(expectedErrorMessage)));
         }
     }
 
@@ -84,9 +101,29 @@ public class RegistrationControllerTest {
                         new RegistrationDto("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "foo@email.com", "Password123!", "Password123!"),
                         List.of("username must be between 4 and 32 chars, only letters numbers and . with a word prefix and suffix")
                 ),
+                //username null
+                Arguments.of(
+                        new RegistrationDto(null, "foo@email.com", "Password123!", "Password123!"),
+                        List.of("username must be between 4 and 32 chars, only letters numbers and . with a word prefix and suffix")
+                ),
+                //username empty
+                Arguments.of(
+                        new RegistrationDto("", "foo@email.com", "Password123!", "Password123!"),
+                        List.of("username must be between 4 and 32 chars, only letters numbers and . with a word prefix and suffix")
+                ),
                 //invalid email
                 Arguments.of(
                         new RegistrationDto("username", "fooemail.com", "Password123!", "Password123!"),
+                        List.of("Invalid email")
+                ),
+                //email null
+                Arguments.of(
+                        new RegistrationDto("username", null, "Password123!", "Password123!"),
+                        List.of("Invalid email")
+                ),
+                //email empty
+                Arguments.of(
+                        new RegistrationDto("username", "", "Password123!", "Password123!"),
                         List.of("Invalid email")
                 ),
                 //pw regex should be well tested
@@ -106,6 +143,26 @@ public class RegistrationControllerTest {
                         new RegistrationDto("username", "foo@email.com", "Password123", "Password123"),
                         List.of(pwErrorExpectedMessage)
                 ),
+                //pw null
+                Arguments.of(
+                        new RegistrationDto("username", "foo@email.com", null, "Password123!"),
+                        List.of(pwErrorExpectedMessage)
+                ),
+                //pw empty
+                Arguments.of(
+                        new RegistrationDto("username", "foo@email.com", "", "Password123!"),
+                        List.of(pwErrorExpectedMessage)
+                ),
+                //confirm-pw null
+                Arguments.of(
+                        new RegistrationDto("username", "foo@email.com", "Password123!", null),
+                        List.of(pwErrorExpectedMessage)
+                ),
+                //confirm-pw empty
+                Arguments.of(
+                        new RegistrationDto("username", "foo@email.com", "Password123!", ""),
+                        List.of(pwErrorExpectedMessage)
+                ),
                 //pw not match
                 Arguments.of(
                         new RegistrationDto("username", "foo@email.com", "Password123!", "PAssword123!"),
@@ -119,6 +176,19 @@ public class RegistrationControllerTest {
         );
     }
 
+    @ParameterizedTest
+    @ValueSource(strings = {"@abcd", "!abcd", ".abcd", "ab^cd", "a&aaaa", ".abdc", "ab..cd", "abdc."})
+    public void whenPostWithInValidUserName_shouldNotCreateUserAndRespondWith422(String username) throws Exception {
+        RegistrationDto registrationDto = new RegistrationDto(username, "foo@email.com", "Password!", "Password123!");
+        //when
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.post("/register")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(asJsonString(registrationDto))
+        );
+        //assert
+        resultActions.andExpect(MockMvcResultMatchers.status().isUnprocessableEntity());
+        resultActions.andExpect(content().string(containsString("username must be between 4 and 32 chars, only letters numbers and . with a word prefix and suffix")));
+    }
     private static String asJsonString(final Object obj) {
         try {
             return new ObjectMapper().writeValueAsString(obj);

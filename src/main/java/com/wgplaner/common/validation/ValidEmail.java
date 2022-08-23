@@ -15,8 +15,8 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Retention(RUNTIME)
 @Constraint(validatedBy = EmailValidator.class)
 @Documented
-@NotNull
-@NotBlank
+@NotNull(message = "Invalid email")
+@NotBlank(message = "Invalid email")
 public @interface ValidEmail {
     String message() default "Invalid email";
     Class<?>[] groups() default {};

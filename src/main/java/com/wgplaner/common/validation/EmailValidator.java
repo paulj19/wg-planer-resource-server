@@ -16,7 +16,7 @@ public class EmailValidator
     }
     @Override
     public boolean isValid(String email, ConstraintValidatorContext context){
-        return (validateEmail(email));
+        return email != null && validateEmail(email);
     }
     private boolean validateEmail(String email) {
         return Pattern.compile(EMAIL_PATTERN).matcher(email).matches();
