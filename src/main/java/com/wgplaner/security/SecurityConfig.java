@@ -1,6 +1,5 @@
 package com.wgplaner.security;
 
-import com.wgplaner.common.url.url_store.SecurityUrls;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -31,19 +30,20 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http
-                .authorizeHttpRequests()
-                    .antMatchers("/register").permitAll()
-                    .anyRequest().authenticated()
-                .and()
-                    .formLogin()
-                    .loginPage(SecurityUrls.LOGIN_URL)
-                    .loginProcessingUrl(SecurityUrls.LOGIN_PROCESSING_URL)
-                    .defaultSuccessUrl(SecurityUrls.LOGIN_SUCCESS_URL)
-                .and()
-                    .logout()
-                    .logoutUrl(SecurityUrls.LOGOUT_URL)
-                    .logoutSuccessUrl(SecurityUrls.LOGIN_URL);
+       // http
+       //         .authorizeHttpRequests()
+       //             .antMatchers("/register").permitAll()
+       //             .antMatchers("/prometheus").permitAll()
+       //         .anyRequest().authenticated()
+       //         .and()
+       //             .formLogin()
+       //             .loginPage(SecurityUrls.LOGIN_URL)
+       //             .loginProcessingUrl(SecurityUrls.LOGIN_PROCESSING_URL)
+       //             .defaultSuccessUrl(SecurityUrls.LOGIN_SUCCESS_URL)
+       //         .and()
+       //             .logout()
+       //             .logoutUrl(SecurityUrls.LOGOUT_URL)
+       //             .logoutSuccessUrl(SecurityUrls.LOGIN_URL);
         return http.cors().and().csrf().disable().build();
     }
 

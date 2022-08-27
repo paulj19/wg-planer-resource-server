@@ -1,6 +1,7 @@
 package com.wgplaner.registration;
 
 
+import com.wgplaner.common.validation.ValidUsername;
 import com.wgplaner.entity.User;
 import com.wgplaner.repository.UserRepository;
 import io.micrometer.core.annotation.Timed;
@@ -36,6 +37,11 @@ public class RegistrationController {
         User user = userRepository.save(registrationDto.mapToUser(passwordEncoder));
         log.info("new user registered and saved to DB. User Id " + user.getId());
         return ResponseEntity.status(HttpStatus.CREATED).body(user);
+    }
+
+    @GetMapping(path = "/username-available")
+    public ResponseEntity<Boolean> isUserNameAvailable(@ValidUsername @RequestParam  String username) {
+        return ResponseEntity.ok(userRepository.findByUsername(username) == null);
     }
 
     @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)

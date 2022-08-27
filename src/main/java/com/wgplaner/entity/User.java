@@ -23,9 +23,12 @@ public class User implements UserDetails {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
+    @Column(unique = true)
     private final String username;
     private final String password;
 
+    @Column(unique = true)
+    //also is email unique checks
     private final String email;
 
     @Override
