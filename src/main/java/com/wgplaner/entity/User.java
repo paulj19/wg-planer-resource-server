@@ -25,6 +25,7 @@ public class User implements UserDetails {
 
     @Column(unique = true)
     private final String username;
+
     private final String password;
 
     @Column(unique = true)

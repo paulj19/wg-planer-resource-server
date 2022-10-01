@@ -1,7 +1,6 @@
 package com.wgplaner.registration;
 
 
-import com.wgplaner.common.validation.ValidUsername;
 import com.wgplaner.entity.User;
 import com.wgplaner.repository.UserRepository;
 import io.micrometer.core.annotation.Timed;
@@ -20,7 +19,7 @@ import java.util.Map;
 @Slf4j
 @RestController
 @Timed
-@RequestMapping("/register")
+@RequestMapping("/registration")
 public class RegistrationController {
 
     private final PasswordEncoder passwordEncoder;
@@ -31,17 +30,28 @@ public class RegistrationController {
         this.userRepository = userRepository;
     }
 
-    @PostMapping
+    @PostMapping(path = "/new")
     @Valid
     public ResponseEntity<?> processUserRegistration(@RequestBody @Valid RegistrationDto registrationDto) {
+        if(userRepository.findByUsername(registrationDto.username()) != null || userRepository.findByEmail(registrationDto.email()) != null) {
+            log.info("New user registration failed, non-unique username or email. Registration dto: {}", registrationDto);
+            return ResponseEntity.unprocessableEntity().body("username and email must be unique");
+        }
         User user = userRepository.save(registrationDto.mapToUser(passwordEncoder));
-        log.info("new user registered and saved to DB. User Id " + user.getId());
+        log.info("New user registered and saved to DB. User Id {}.", user.getId());
         return ResponseEntity.status(HttpStatus.CREATED).body(user);
     }
 
     @GetMapping(path = "/username-available")
-    public ResponseEntity<Boolean> isUserNameAvailable(@ValidUsername @RequestParam  String username) {
+    //todo validity checks
+    public ResponseEntity<Boolean> isUserNameAvailable(@RequestParam String username) {
         return ResponseEntity.ok(userRepository.findByUsername(username) == null);
+    }
+
+    @GetMapping(path = "/email-available")
+    //todo validity checks
+    public ResponseEntity<Boolean> isEmailAvailable(@RequestParam String email) {
+        return ResponseEntity.ok(userRepository.findByUsername(email) == null);
     }
 
     @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
@@ -54,7 +64,7 @@ public class RegistrationController {
             String errorMessage = error.getDefaultMessage();
             errors.put(fieldName, errorMessage);
         });
-       log.error("validation failed for registrationDto. " + errors);
+       log.error("Validation failed for registrationDto. " + errors);
         return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
                 .body(errors.toString());
     }

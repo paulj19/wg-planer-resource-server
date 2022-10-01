@@ -30,7 +30,7 @@ import java.lang.annotation.Target;
              no whitespace allowed in the entire string
              anything, at least eight places though end-of-string
             """)
-@Pattern(regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^`<>&+=\\\"!ºª·#~%&'¿¡€,:;*/+-.=_\\[\\]\\(\\)\\|\\_\\?\\\\])(?=\\S+$).{8,}$", message = """
+@Pattern(regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*()\\-_\"=+{};:,<.>])(?=\\S+$).{8,}$", message = """
             password must meet the following criteria must be start-of-string
              a digit must occur at least once
              a lower case letter must occur at least once
