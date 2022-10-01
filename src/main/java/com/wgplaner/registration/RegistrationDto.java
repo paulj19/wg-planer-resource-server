@@ -18,9 +18,4 @@ public record RegistrationDto(
     public User mapToUser(PasswordEncoder passwordEncoder) {
         return new User(username, passwordEncoder.encode(password), email);
     }
-
-    @AssertTrue(message = "The password fields must match")
-    private boolean isValidPass() {
-        return Objects.equals(password, confirmPassword);
-    }
 }
