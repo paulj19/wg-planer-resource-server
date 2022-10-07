@@ -1,6 +1,6 @@
 package com.wgplaner.security;
 
-import com.wgplaner.entity.User;
+import com.wgplaner.core.entity.User;
 import com.wgplaner.repository.UserRepository;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;

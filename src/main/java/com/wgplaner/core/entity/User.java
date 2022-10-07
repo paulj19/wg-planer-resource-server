@@ -1,4 +1,4 @@
-package com.wgplaner.entity;
+package com.wgplaner.core.entity;
 
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
@@ -18,10 +18,6 @@ import java.util.List;
 public class User implements UserDetails {
     @Serial
     private static final long serialVersionUID = 1L;
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
 
     @Column(unique = true)
     private final String username;
