@@ -1,7 +1,8 @@
-package com.wgplaner.registration.entity;
+package com.wgplaner.core.entity;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.CreationTimestamp;
@@ -10,6 +11,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 import javax.persistence.*;
 import java.time.ZonedDateTime;
 
+@Getter
 @MappedSuperclass
 @SuperBuilder
 @AllArgsConstructor

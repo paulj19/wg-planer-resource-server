@@ -12,20 +12,20 @@ import java.util.List;
 
 @Data
 @Entity
-@Table(name="main_user")
+@Table(name="basic_user")
+@EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor(access = AccessLevel.PROTECTED, force = true)
 @RequiredArgsConstructor
-public class User implements UserDetails {
+public class User extends AbstractEntity implements UserDetails {
     @Serial
     private static final long serialVersionUID = 1L;
 
-    @Column(unique = true)
+    @Column(name = "name", unique = true)
     private final String username;
 
     private final String password;
 
-    @Column(unique = true)
-    //also is email unique checks
+    @Column(name = "email", unique = true)
     private final String email;
 
     @Override
