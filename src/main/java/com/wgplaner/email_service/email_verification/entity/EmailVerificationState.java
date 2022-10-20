@@ -4,6 +4,7 @@ import com.wgplaner.core.entity.AbstractEntity;
 import com.wgplaner.core.entity.User;
 import com.wgplaner.email_service.email_verification.EmailVerificationStatus;
 import lombok.*;
+import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
 import java.util.UUID;
@@ -20,6 +21,7 @@ public class EmailVerificationState extends AbstractEntity {
     private final User user;
 
     @Column(name = "uuid", unique = true)
+    @Type(type = "uuid-char")
     private final UUID uuid = UUID.randomUUID();
 
     @Enumerated(EnumType.STRING)

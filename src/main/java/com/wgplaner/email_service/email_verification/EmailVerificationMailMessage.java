@@ -8,8 +8,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
 public class EmailVerificationMailMessage {
-    private static final String VERIFICATION_URL_FORMAT = "https://%s/registration/email-verification?";
-    private static final String VERIFICATION_URL_FORMAT_QUERY = "id=%s&email=%s";
+    private static final String VERIFICATION_URL = "https://%s/email-verification?";
+    private static final String VERIFICATION_URL_QUERY_ID = "id=%s";
+    private static final String VERIFICATION_URL_QUERY_EMAIL = "email=%s";
     public static final String SUBJECT ="Please validate your email";
     public static final String FROM = "no-reply@%s";
     public static final String TEXT = "please click on the link to verify your email: %s";
@@ -25,9 +26,10 @@ public class EmailVerificationMailMessage {
         return message;
     }
     private static String generateVerificationLink(EmailVerificationState verificationState, String domainName){
-        String url = String.format(VERIFICATION_URL_FORMAT, domainName);
-        String urlQuery = URLEncoder.encode(String.format(VERIFICATION_URL_FORMAT_QUERY, verificationState.getUuid(), verificationState.getUser().getEmail()),
-                StandardCharsets.UTF_8);
+        String url = String.format(VERIFICATION_URL, domainName);
+        String urlQuery =
+                String.format(VERIFICATION_URL_QUERY_ID, verificationState.getUuid()) + "&" + String.format(VERIFICATION_URL_QUERY_EMAIL,
+                URLEncoder.encode(verificationState.getUser().getEmail(), StandardCharsets.UTF_8));
         return url + urlQuery;
     }
 }
