@@ -2,7 +2,7 @@ package com.wgplaner.registration;
 
 
 import com.wgplaner.core.entity.User;
-import com.wgplaner.repository.UserRepository;
+import com.wgplaner.core.repository.UserRepository;
 import io.micrometer.core.annotation.Timed;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;

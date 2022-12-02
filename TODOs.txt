@@ -1,1 +1,2 @@
 1. if any error in reg flow, implement a retry mechanism.
+2. rename basic_table to user_profile

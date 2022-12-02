@@ -4,7 +4,7 @@ import com.wgplaner.BaseIT;
 import com.wgplaner.core.entity.User;
 import com.wgplaner.email_service.email_verification.entity.EmailVerificationState;
 import com.wgplaner.email_service.email_verification.repository.EmailVerificationStateRepository;
-import com.wgplaner.repository.UserRepository;
+import com.wgplaner.core.repository.UserRepository;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

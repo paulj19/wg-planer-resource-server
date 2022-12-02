@@ -1,7 +1,7 @@
 package com.wgplaner.common.validation;
 
 
-import com.wgplaner.repository.UserRepository;
+import com.wgplaner.core.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 

@@ -1,4 +1,4 @@
-package com.wgplaner.repository;
+package com.wgplaner.core.repository;
 
 import com.wgplaner.core.entity.User;
 import org.springframework.data.repository.CrudRepository;
