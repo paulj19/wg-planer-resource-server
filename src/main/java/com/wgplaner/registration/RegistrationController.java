@@ -33,13 +33,14 @@ public class RegistrationController {
     @PostMapping(path = "/new")
     @Valid
     public ResponseEntity<?> processUserRegistration(@RequestBody @Valid RegistrationDto registrationDto) {
-        if(userRepository.findByUsername(registrationDto.username()) != null || userRepository.findByEmail(registrationDto.email()) != null) {
-            log.info("New user registration failed, non-unique username or email. Registration dto: {}", registrationDto);
-            return ResponseEntity.unprocessableEntity().body("username and email must be unique");
-        }
-        User user = userRepository.save(registrationDto.mapToUser(passwordEncoder));
-        log.info("New user registered and saved to DB. User Id {}.", user.getId());
-        return ResponseEntity.status(HttpStatus.CREATED).body(user);
+        //if(userRepository.findByUsername(registrationDto.username()) != null || userRepository.findByEmail(registrationDto.email()) != null) {
+        //    log.info("New user registration failed, non-unique username or email. Registration dto: {}", registrationDto);
+        //    return ResponseEntity.unprocessableEntity().body("username and email must be unique");
+        //}
+        //User user = userRepository.save(registrationDto.mapToUser(passwordEncoder));
+        //log.info("New user registered and saved to DB. User Id {}.", user.getId());
+        //return ResponseEntity.status(HttpStatus.CREATED).body(user);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("");
     }
 
     @GetMapping(path = "/username-available")
