@@ -1,13 +1,11 @@
 package com.wgplaner.registration;
 
 
-import com.wgplaner.core.entity.User;
 import com.wgplaner.core.repository.UserRepository;
 import io.micrometer.core.annotation.Timed;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
@@ -19,14 +17,12 @@ import java.util.Map;
 @Slf4j
 @RestController
 @Timed
-@RequestMapping("/registration")
+@RequestMapping("/register")
 public class RegistrationController {
 
-    private final PasswordEncoder passwordEncoder;
     private final UserRepository userRepository;
 
-    public RegistrationController(PasswordEncoder passwordEncoder, UserRepository userRepository) {
-        this.passwordEncoder = passwordEncoder;
+    public RegistrationController(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
 
