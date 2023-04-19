@@ -4,7 +4,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configurers.oauth2.server.resource.OAuth2ResourceServerConfigurer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -15,10 +14,24 @@ public class SecurityConfig {
 
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+//        http.cors().configurationSource(request -> {
+//            CorsConfiguration corsConfiguration = new CorsConfiguration();
+//            corsConfiguration.setAllowedOrigins(Arrays.asList("http://127.0.0.1:19006",
+//                    "localhj"));
+//            corsConfiguration.setAllowCredentials(true);
+//            corsConfiguration.setAllowedMethods(Arrays.asList(HttpMethod.GET.name(), HttpMethod.HEAD.name(), HttpMethod.POST.name(), HttpMethod.OPTIONS.name()));
+//            corsConfiguration.setAllowedHeaders(Arrays.asList("Authorization", "Cache-Control", "Content-Type"));
+//            corsConfiguration.setExposedHeaders(Arrays.asList("Authorization"));
+//            corsConfiguration.setMaxAge(1800L);
+//            //corsConfiguration.setAllowedOrigins(Arrays.asList("*"));
+//            return corsConfiguration;
+//        });
         http
+                .authorizeRequests()
+                .antMatchers("/register/**").permitAll().and()
                 .authorizeRequests(authorizeRequests ->
-                        authorizeRequests.anyRequest().authenticated())
-                .oauth2ResourceServer(OAuth2ResourceServerConfigurer::jwt);
+                        authorizeRequests.anyRequest().authenticated()).csrf().disable();
+//                .oauth2ResourceServer(OAuth2ResourceServerConfigurer::jwt);
         return http.build();
     }
     @Bean

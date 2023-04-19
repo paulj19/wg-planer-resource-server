@@ -20,7 +20,7 @@ public class EmailVerificationMailMessage {
         Objects.requireNonNull(domainName);
         SimpleMailMessage message = new SimpleMailMessage();
 //        message.setFrom(String.format(FROM, domainName));
-        message.setTo(verificationState.getUser().getEmail());
+        message.setTo(verificationState.getUserProfile().getEmail());
         message.setSubject(SUBJECT);
         message.setText(String.format(TEXT, generateVerificationLink(verificationState, domainName)));
         return message;
@@ -29,7 +29,7 @@ public class EmailVerificationMailMessage {
         String url = String.format(VERIFICATION_URL, domainName);
         String urlQuery =
                 String.format(VERIFICATION_URL_QUERY_ID, verificationState.getUuid()) + "&" + String.format(VERIFICATION_URL_QUERY_EMAIL,
-                URLEncoder.encode(verificationState.getUser().getEmail(), StandardCharsets.UTF_8));
+                URLEncoder.encode(verificationState.getUserProfile().getEmail(), StandardCharsets.UTF_8));
         return url + urlQuery;
     }
 }

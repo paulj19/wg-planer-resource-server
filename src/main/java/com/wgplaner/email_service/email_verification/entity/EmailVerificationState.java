@@ -1,7 +1,7 @@
 package com.wgplaner.email_service.email_verification.entity;
 
 import com.wgplaner.core.entity.AbstractEntity;
-import com.wgplaner.core.entity.User;
+import com.wgplaner.core.entity.UserProfile;
 import com.wgplaner.email_service.email_verification.EmailVerificationStatus;
 import lombok.*;
 import org.hibernate.annotations.Type;
@@ -14,11 +14,10 @@ import java.util.UUID;
 @Entity
 @Table(name = "email_verification_state")
 @EqualsAndHashCode(callSuper = true)
-@NoArgsConstructor(access = AccessLevel.PROTECTED, force = true)
 public class EmailVerificationState extends AbstractEntity {
     @OneToOne
-    @JoinColumn(name = "user_id")
-    private final User user;
+    @JoinColumn(name = "id")
+    private UserProfile userProfile;
 
     @Column(name = "uuid", unique = true)
     @Type(type = "uuid-char")
@@ -28,8 +27,10 @@ public class EmailVerificationState extends AbstractEntity {
     @Column(name = "verification_status")
     private @Setter EmailVerificationStatus status;
 
-    public EmailVerificationState(User user) {
-        this.user = user;
+    public EmailVerificationState(UserProfile userProfile) {
+        this.userProfile = userProfile;
         this.status = EmailVerificationStatus.NOT_SENT;
     }
+
+    public EmailVerificationState() {}
 }

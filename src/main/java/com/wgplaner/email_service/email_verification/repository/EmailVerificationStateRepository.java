@@ -8,7 +8,7 @@ import org.springframework.data.repository.query.Param;
 import java.util.UUID;
 
 public interface EmailVerificationStateRepository extends CrudRepository<EmailVerificationState, Long> {
-    @Query("SELECT e FROM EmailVerificationState e where e.user.id = :userId")
+    @Query("SELECT e FROM EmailVerificationState e where e.userProfile.id = :userId")
     EmailVerificationState findByUserId(@Param("userId") Long userId);
 
     EmailVerificationState findByUuid(UUID uuid);

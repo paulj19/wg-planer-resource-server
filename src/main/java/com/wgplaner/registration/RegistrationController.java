@@ -1,42 +1,46 @@
 package com.wgplaner.registration;
 
-
+import com.wgplaner.auth.AuthServerRequester;
+import com.wgplaner.core.entity.UserProfile;
 import com.wgplaner.core.repository.UserRepository;
 import io.micrometer.core.annotation.Timed;
+import java.util.HashMap;
+import java.util.Map;
+import javax.validation.Valid;
+import javax.validation.ValidationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
-
-import javax.validation.Valid;
-import java.util.HashMap;
-import java.util.Map;
 
 @Slf4j
 @RestController
 @Timed
+@Validated
 @RequestMapping("/register")
 public class RegistrationController {
 
     private final UserRepository userRepository;
+    private final AuthServerRequester authServerRequester;
 
-    public RegistrationController(UserRepository userRepository) {
+    public RegistrationController(UserRepository userRepository, AuthServerRequester authServerRequester) {
         this.userRepository = userRepository;
+        this.authServerRequester = authServerRequester;
     }
 
-    @PostMapping(path = "/new")
     @Valid
-    public ResponseEntity<?> processUserRegistration(@RequestBody @Valid RegistrationDto registrationDto) {
-        //if(userRepository.findByUsername(registrationDto.username()) != null || userRepository.findByEmail(registrationDto.email()) != null) {
-        //    log.info("New user registration failed, non-unique username or email. Registration dto: {}", registrationDto);
-        //    return ResponseEntity.unprocessableEntity().body("username and email must be unique");
-        //}
-        //User user = userRepository.save(registrationDto.mapToUser(passwordEncoder));
-        //log.info("New user registered and saved to DB. User Id {}.", user.getId());
-        //return ResponseEntity.status(HttpStatus.CREATED).body(user);
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("");
+    @PostMapping(path = "/new")
+    @ResponseStatus(HttpStatus.CREATED)
+    public UserProfileDto registerNewUser(@RequestBody @Valid RegistrationDto registrationDto) {
+        validateUsernameUnique(registrationDto);
+        validateEmailUnique(registrationDto);
+        Long oid = authServerRequester.registerUserAndFetchOid(registrationDto.username(), registrationDto.password());
+        UserProfile userProfile = userRepository.save(new UserProfile(registrationDto.username(), registrationDto.email(), oid, registrationDto.authServer()));
+        log.info("New user registered and saved to DB. User Id {}.", userProfile.getId());
+        return new UserProfileDto(userProfile.getId(), userProfile.getUsername(), userProfile.getEmail(), userProfile.getOid(), userProfile.getAuthServer());
     }
 
     @GetMapping(path = "/username-available")
@@ -49,6 +53,20 @@ public class RegistrationController {
     //todo validity checks
     public ResponseEntity<Boolean> isEmailAvailable(@RequestParam String email) {
         return ResponseEntity.ok(userRepository.findByUsername(email) == null);
+    }
+
+    private void validateUsernameUnique(RegistrationDto registrationDto) {
+        if(userRepository.findByUsername(registrationDto.username()) != null ) {
+            log.error("New user registration failed, non-unique username. Registration dto: {}", registrationDto);
+            throw new ValidationException("username=non-unique username: " + registrationDto.username());
+        }
+    }
+
+    private void validateEmailUnique(RegistrationDto registrationDto) {
+        if(userRepository.findByEmail( registrationDto.email()) != null ) {
+            log.error("New user registration failed, non-unique email. Registration dto: {}", registrationDto);
+            throw new ValidationException("email=non-unique email: " + registrationDto.email());
+        }
     }
 
     @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
@@ -64,5 +82,21 @@ public class RegistrationController {
        log.error("Validation failed for registrationDto. " + errors);
         return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
                 .body(errors.toString());
+    }
+    @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
+    @ExceptionHandler(ValidationException.class)
+    public ResponseEntity<String> handleCustomValidationException(
+            ValidationException ex) {
+        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
+                .body(ex.getMessage());
+    }
+
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<String> handleRuntimeException(
+            RuntimeException ex) {
+        log.error(ex.getMessage());
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(ex.getMessage());
     }
 }

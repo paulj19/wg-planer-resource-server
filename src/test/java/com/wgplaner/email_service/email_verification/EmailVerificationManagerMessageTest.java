@@ -19,9 +19,9 @@ public class EmailVerificationManagerMessageTest {
         EmailVerificationState state = new EmailVerificationState(CommonTestData.createUser());
         SimpleMailMessage message = EmailVerificationMailMessage.generateMessage(state, "x.com");
 //        assertThat(message.getFrom()).isEqualTo("no-reply@x.com");
-        assertThat(Objects.requireNonNull(message.getTo())[0]).isEqualTo(state.getUser().getEmail());
+        assertThat(Objects.requireNonNull(message.getTo())[0]).isEqualTo(state.getUserProfile().getEmail());
         assertThat(message.getSubject()).isEqualTo(EmailVerificationMailMessage.SUBJECT);
         assertThat(message.getText()).isEqualTo(String.format(EmailVerificationMailMessage.TEXT, "https://x.com/email" +
-                "-verification?" + "id=" + state.getUuid() + "&email=" + URLEncoder.encode(state.getUser().getEmail() , StandardCharsets.UTF_8)));
+                "-verification?" + "id=" + state.getUuid() + "&email=" + URLEncoder.encode(state.getUserProfile().getEmail() , StandardCharsets.UTF_8)));
     }
 }
