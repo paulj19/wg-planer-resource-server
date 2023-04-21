@@ -1,5 +1,7 @@
 package com.wgplaner.security;
 
+import com.wgplaner.core.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -15,26 +17,44 @@ import java.util.Arrays;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+    @Autowired
+    UserRepository userRepository;
 
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
-                .authorizeRequests().antMatchers("/register/**").permitAll().and()
-                .authorizeRequests().antMatchers("/actuator/**").permitAll().and()
-                .authorizeRequests(authorizeRequests ->
-                        authorizeRequests.anyRequest().authenticated()).csrf().disable()
-//                .oauth2ResourceServer(OAuth2ResourceServerConfigurer::jwt);
-        .cors().configurationSource(request -> {
-            CorsConfiguration corsConfiguration = new CorsConfiguration();
-            corsConfiguration.setAllowedOrigins(Arrays.asList("http://127.0.0.1:19006"));
-            corsConfiguration.setAllowCredentials(true);
-            corsConfiguration.setAllowedMethods(Arrays.asList(HttpMethod.GET.name(), HttpMethod.HEAD.name(), HttpMethod.POST.name(), HttpMethod.OPTIONS.name()));
-            corsConfiguration.setAllowedHeaders(Arrays.asList("Authorization", "Cache-Control", "Content-Type"));
-            corsConfiguration.setExposedHeaders(Arrays.asList("Authorization"));
-            corsConfiguration.setMaxAge(1800L);
-            //corsConfiguration.setAllowedOrigins(Arrays.asList("*"));
-            return corsConfiguration;
-        });
+    http.authorizeRequests()
+        .antMatchers("/register/**")
+        .permitAll()
+        .and()
+        .authorizeRequests()
+        .antMatchers("/actuator/**")
+        .permitAll()
+        .and()
+        .authorizeRequests(authorizeRequests -> authorizeRequests.anyRequest().authenticated())
+        .csrf()
+        .disable()
+        // .oauth2ResourceServer(OAuth2ResourceServerConfigurer::jwt)
+        .oauth2ResourceServer()
+        .jwt(c -> c.jwtAuthenticationConverter(new UserProfileJwtCustomizer(userRepository))).and()
+        .cors()
+        .configurationSource(
+            request -> {
+              CorsConfiguration corsConfiguration = new CorsConfiguration();
+              corsConfiguration.setAllowedOrigins(Arrays.asList("http://127.0.0.1:19006"));
+              corsConfiguration.setAllowCredentials(true);
+              corsConfiguration.setAllowedMethods(
+                  Arrays.asList(
+                      HttpMethod.GET.name(),
+                      HttpMethod.HEAD.name(),
+                      HttpMethod.POST.name(),
+                      HttpMethod.OPTIONS.name()));
+              corsConfiguration.setAllowedHeaders(
+                  Arrays.asList("Authorization", "Cache-Control", "Content-Type"));
+              corsConfiguration.setExposedHeaders(Arrays.asList("Authorization"));
+              corsConfiguration.setMaxAge(1800L);
+              // corsConfiguration.setAllowedOrigins(Arrays.asList("*"));
+              return corsConfiguration;
+            });
         return http.build();
     }
     @Bean

@@ -1,9 +1,8 @@
 package com.wgplaner.core.entity;
 
 import com.wgplaner.core.AuthServer;
-import lombok.*;
-
 import javax.persistence.*;
+import lombok.*;
 
 @Data
 @Entity
