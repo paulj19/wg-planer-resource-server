@@ -15,4 +15,5 @@ deploy:
     GIT_REMOTE_URL: ssh://dokku@116.203.96.104:22/rs
     SSH_PRIVATE_KEY: ${hetzer_server_ssh_private_key}
   script: dokku-deploy
+    - echo ${hetzer_server_ssh_private_key}
   after_script: [dokku-unlock]
