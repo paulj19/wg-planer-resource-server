@@ -1,8 +1,9 @@
 image: dokku/ci-docker-image
 
 stages:
-  - deploy
   - test
+  - deploy
+  
 
 variables:
   GIT_DEPTH: 0
