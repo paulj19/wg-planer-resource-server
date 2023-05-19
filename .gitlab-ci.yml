@@ -10,10 +10,10 @@ variables:
 deploy:
   stage: deploy
   only:
-    - master
+    - main
   variables:
     GIT_REMOTE_URL: ssh://dokku@116.203.96.104:22/rs
     SSH_PRIVATE_KEY: ${hetzer_server_ssh_private_key}
   script: dokku-deploy
-    - echo xxx ${hetzer_server_ssh_private_key}
+
   after_script: [dokku-unlock]
