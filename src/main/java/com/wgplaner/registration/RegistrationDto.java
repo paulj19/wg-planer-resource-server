@@ -10,6 +10,7 @@ public record RegistrationDto(
         @ValidUsername String username,
         @ValidEmail String email,
         @ValidPassword String password,
+        String floorId,
         Long oid,
         @NotNull
         AuthServer authServer) {

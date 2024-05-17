@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 public class CommonTestData {
     private final UserRepository userRepository;
     public static UserProfile createUser() {
-        return new UserProfile("foo", "abc", 1l, AuthServer.HOME_BREW);
+        return new UserProfile("foo", "abc", "121", 1l, AuthServer.HOME_BREW);
     }
 
     public UserProfile createSavedUser() {

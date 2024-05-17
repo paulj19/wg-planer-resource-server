@@ -37,10 +37,10 @@ public class RegistrationController {
     public UserProfileDto registerNewUser(@RequestBody @Valid RegistrationDto registrationDto) {
         validateUsernameUnique(registrationDto);
         validateEmailUnique(registrationDto);
-        Long oid = authServerRequester.registerUserAndFetchOid(registrationDto.username(), registrationDto.password());
-        UserProfile userProfile = userRepository.save(new UserProfile(registrationDto.username(), registrationDto.email(), oid, registrationDto.authServer()));
+        Long oid = authServerRequester.registerUserAndFetchOid(registrationDto.username(), registrationDto.password(), registrationDto.floorId());
+        UserProfile userProfile = userRepository.save(new UserProfile(registrationDto.username(), registrationDto.email(), registrationDto.floorId(), oid, registrationDto.authServer()));
         log.info("New user registered and saved to DB. User Id {}.", userProfile.getId());
-        return new UserProfileDto(userProfile.getId(), userProfile.getUsername(), userProfile.getEmail(), userProfile.getOid(), userProfile.getAuthServer());
+        return new UserProfileDto(userProfile.getId(), userProfile.getUsername(), userProfile.getEmail(), userProfile.getFloorId(), userProfile.getOid(), userProfile.getAuthServer());
     }
 
     @GetMapping(path = "/username-available")

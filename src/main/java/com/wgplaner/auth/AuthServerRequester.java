@@ -20,9 +20,9 @@ public class AuthServerRequester {
     this.authServerConfig = authServerConfig;
   }
 
-  public Long registerUserAndFetchOid(String username, String password) {
+  public Long registerUserAndFetchOid(String username, String password, String floorId) {
     try {
-      String body = JsonUtils.toJsonString(Map.of("username", username, "password", password));
+      String body = JsonUtils.toJsonString(Map.of("username", username, "password", password, "floorId", floorId));
       Long oid = HttpClient.makeRequest(authServerConfig.getUri() + "/register/new", getHeaders(), body, Long.class);
       if(oid == null) {
         throw new RuntimeException();

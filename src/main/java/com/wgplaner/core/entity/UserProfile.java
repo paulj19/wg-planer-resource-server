@@ -15,6 +15,8 @@ public class UserProfile extends AbstractEntity {
     private String username;
     @Column(name = "email", unique = true)
     private String email;
+    @Column(name = "floor_id")
+    private String floorId;
     @Column(name = "oid")
     private Long oid;
     @Enumerated(EnumType.STRING)
