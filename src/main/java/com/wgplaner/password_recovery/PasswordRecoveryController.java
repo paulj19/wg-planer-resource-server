@@ -1,5 +1,6 @@
 package com.wgplaner.password_recovery;
 
+import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
@@ -8,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -40,16 +42,25 @@ public class PasswordRecoveryController {
     if (userProfile == null) {
       throw new EmailNotFoundException("Email not found: " + email);
     }
-    // UserProfile userProfile = new UserProfile("paulo", "diljosepaul@gmail.com",
-    // 1L, AuthServer.HOME_BREW);
-    // userRepository.save(userProfile);
     String code = generateCode();
     PasswordRecoveryEmailEntity savedEntity = passwordRecoveryEmailRepository
         .save(new PasswordRecoveryEmailEntity(userProfile, code));
-    System.out.println("savedEntity" + savedEntity.getUserProfile() + savedEntity.getCode());
     SimpleMailMessage mailMsg = createMessage(userProfile, code);
     mailService.sendAsync(mailMsg, new PasswordRecoveryMailCallback(savedEntity, mailMsg, mailService));
-    System.out.println("sent email");
+  }
+
+  @GetMapping(path = "/validate")
+  public UserProfileDto validateCode(@RequestParam(name = "code", required = true) String code) {
+    PasswordRecoveryEmailEntity entity = passwordRecoveryEmailRepository.findByCode(code);
+    if (entity == null) {
+      throw new CodeNotFoundException("Code not found: " + code);
+    }
+    if (entity.getCreationDate().plusMinutes(20).isBefore(ZonedDateTime.now())) {
+      throw new CodeExpiredException("Code expired: " + code);
+    }
+    UserProfile userProfile = entity.getUserProfile();
+    return new UserProfileDto(userProfile.getId(), userProfile.getUsername(), userProfile.getEmail(),
+        userProfile.getOid(), userProfile.getAuthServer());
   }
 
   private static String generateCode() {
@@ -85,7 +96,6 @@ public class PasswordRecoveryController {
 
     @Override
     public void onSuccess() {
-      System.out.println("Password recovery email sent success");
     }
 
     @Override
@@ -103,6 +113,20 @@ public class PasswordRecoveryController {
   @ExceptionHandler(EmailNotFoundException.class)
   public ResponseEntity<String> handleValidationExceptions(EmailNotFoundException ex) {
     log.error("PasswordRecovery initiate error" + ex.getMessage());
+    return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(ex.getMessage());
+  }
+
+  @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
+  @ExceptionHandler(CodeNotFoundException.class)
+  public ResponseEntity<String> handleValidationExceptions(CodeNotFoundException ex) {
+    log.error("PasswordRecovery code not found" + ex.getMessage());
+    return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(ex.getMessage());
+  }
+
+  @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
+  @ExceptionHandler(CodeExpiredException.class)
+  public ResponseEntity<String> handleValidationExceptions(CodeExpiredException ex) {
+    log.error("PasswordRecovery code expired" + ex.getMessage());
     return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(ex.getMessage());
   }
 }
