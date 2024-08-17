@@ -8,20 +8,20 @@ import java.util.concurrent.CompletableFuture;
 
 @RequiredArgsConstructor
 public class JavaMailService implements MailService {
-    private final JavaMailSender javaMailSender;
+  private final JavaMailSender javaMailSender;
 
-    @Override
-    public void sendAsync(SimpleMailMessage message, MailSentCallback mailSentCallback) {
-        CompletableFuture.supplyAsync(() -> {
-            javaMailSender.send(message);
-            return null;
-        }).handle((res, ex) -> {
-            if (ex != null) {
-                mailSentCallback.onFailure();
-            } else {
-                mailSentCallback.onSuccess();
-            }
-            return res;
-        });
-    }
+  @Override
+  public void sendAsync(SimpleMailMessage message, MailSentCallback mailSentCallback) {
+    CompletableFuture.supplyAsync(() -> {
+      javaMailSender.send(message);
+      return null;
+    }).handle((res, ex) -> {
+      if (ex != null) {
+        mailSentCallback.onFailure();
+      } else {
+        mailSentCallback.onSuccess();
+      }
+      return res;
+    });
+  }
 }
