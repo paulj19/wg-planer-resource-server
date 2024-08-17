@@ -7,7 +7,6 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 
-import com.mysql.cj.xdevapi.Result;
 import com.wgplaner.BaseIT;
 import com.wgplaner.auth.AuthServerRequester;
 import com.wgplaner.common.util.JsonUtils;
