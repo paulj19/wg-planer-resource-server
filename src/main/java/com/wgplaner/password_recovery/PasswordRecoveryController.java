@@ -5,17 +5,21 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.wgplaner.auth.AuthServerRequester;
+import com.wgplaner.common.httpclient.HttpClient;
 import com.wgplaner.core.AuthServer;
 import com.wgplaner.core.entity.UserProfile;
 import com.wgplaner.core.repository.UserRepository;
@@ -35,18 +39,24 @@ public class PasswordRecoveryController {
   private final PasswordRecoveryEmailRepository passwordRecoveryEmailRepository;
   private final MailService mailService;
   private static final Random RANDOM = new Random();
+  private final AuthServerRequester authServerRequester;
 
   @PostMapping(path = "/initiate")
   public void initiateEmail(@RequestParam(name = "email", required = true) String email) {
     UserProfile userProfile = userRepository.findByEmail(email);
     if (userProfile == null) {
-      throw new EmailNotFoundException("Email not found: " + email);
+      throw new EmailNotFoundException("Userprofile not found by email: " + email);
     }
     String code = generateCode();
+    System.out.println("INITIATE: " + code + userProfile);
     PasswordRecoveryEmailEntity savedEntity = passwordRecoveryEmailRepository
         .save(new PasswordRecoveryEmailEntity(userProfile, code));
+    System.out.println("SAVED: " + savedEntity.getUserProfile() + " " + savedEntity.getCode());
     SimpleMailMessage mailMsg = createMessage(userProfile, code);
     mailService.sendAsync(mailMsg, new PasswordRecoveryMailCallback(savedEntity, mailMsg, mailService));
+
+    var ggg = passwordRecoveryEmailRepository.findByCode(savedEntity.getCode());
+    System.out.println("GGG: " + ggg.getUserProfile() + " " + ggg.getCode());
   }
 
   @GetMapping(path = "/validate")
@@ -61,6 +71,28 @@ public class PasswordRecoveryController {
     UserProfile userProfile = entity.getUserProfile();
     return new UserProfileDto(userProfile.getId(), userProfile.getUsername(), userProfile.getEmail(),
         userProfile.getOid(), userProfile.getAuthServer());
+  }
+
+  @PostMapping(path = "/reset-password")
+  public void resetPassword(@RequestBody ResetPasswordDto resetPasswordDto) {
+    PasswordRecoveryEmailEntity entity = passwordRecoveryEmailRepository.findByCode(resetPasswordDto.code());
+    if (entity == null) {
+      throw new CodeNotFoundException("Code not found: " + resetPasswordDto.code());
+    }
+    var x = userRepository.findAll();
+    for (var y : x) {
+      System.out.println("USER: " + y);
+    }
+    var g = passwordRecoveryEmailRepository.findAll();
+    for (var y : g) {
+      System.out.println("RECOV: " + y.getUserProfile() + " " + y.getCode());
+    }
+    System.out.println("ENTITY" + entity.getUserProfile() + " " + resetPasswordDto.password());
+    authServerRequester.resetPassword(entity.getUserProfile().getOid(), resetPasswordDto.password());
+
+    passwordRecoveryEmailRepository.delete(entity);
+    System.out.println("Password reset");
+    // if result ok, delete code and return
   }
 
   private static String generateCode() {
@@ -100,9 +132,9 @@ public class PasswordRecoveryController {
 
     @Override
     public void onFailure() {
-      log.error(
-          "Failed to send password recovery email entity: " + entity + " retry attempt:" + retry);
       if (retry <= 3) {
+        log.error(
+            "Failed to send password recovery email entity: " + entity + (retry > 0 ? " retry attempt:" + retry : ""));
         mailService.sendAsync(message, this);
         retry++;
       }
@@ -119,7 +151,7 @@ public class PasswordRecoveryController {
   @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
   @ExceptionHandler(CodeNotFoundException.class)
   public ResponseEntity<String> handleValidationExceptions(CodeNotFoundException ex) {
-    log.error("PasswordRecovery code not found" + ex.getMessage());
+    log.error("PasswordRecovery code not found. " + ex.getMessage());
     return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(ex.getMessage());
   }
 

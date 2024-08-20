@@ -12,17 +12,18 @@ import javax.persistence.*;
 @Table(name = "password_recovery")
 @EqualsAndHashCode(callSuper = true)
 public class PasswordRecoveryEmailEntity extends AbstractEntity {
-    @OneToOne
-    @JoinColumn(name = "id")
-    private UserProfile userProfile;
+  @ManyToOne
+  @JoinColumn(name = "user_profile_id", referencedColumnName = "id")
+  private UserProfile userProfile;
 
-    @Column(name = "code", unique = true, nullable = false)
-    private String code;
+  @Column(name = "code", unique = true, nullable = false)
+  private String code;
 
-    public PasswordRecoveryEmailEntity(UserProfile userProfile, String code) {
-        this.userProfile = userProfile;
-        this.code = code;
-    }
+  public PasswordRecoveryEmailEntity(UserProfile userProfile, String code) {
+    this.userProfile = userProfile;
+    this.code = code;
+  }
 
-    public PasswordRecoveryEmailEntity() {}
+  public PasswordRecoveryEmailEntity() {
+  }
 }

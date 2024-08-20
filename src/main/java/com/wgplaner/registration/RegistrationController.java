@@ -35,10 +35,14 @@ public class RegistrationController {
     @PostMapping(path = "/new")
     @ResponseStatus(HttpStatus.CREATED)
     public UserProfileDto registerNewUser(@RequestBody @Valid RegistrationDto registrationDto) {
+      System.out.println("NEW USER REQUESTED");
         validateUsernameUnique(registrationDto);
         validateEmailUnique(registrationDto);
         Long oid = authServerRequester.registerUserAndFetchOid(registrationDto.username(), registrationDto.password());
+      System.out.println("OID: " + oid);
         UserProfile userProfile = userRepository.save(new UserProfile(registrationDto.username(), registrationDto.email(), oid, registrationDto.authServer()));
+
+      System.out.println("USER PROFILE: " + userProfile);
         log.info("New user registered and saved to DB. User Id {}.", userProfile.getId());
         return new UserProfileDto(userProfile.getId(), userProfile.getUsername(), userProfile.getEmail(), userProfile.getOid(), userProfile.getAuthServer());
     }

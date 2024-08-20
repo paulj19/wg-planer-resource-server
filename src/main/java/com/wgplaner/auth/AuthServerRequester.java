@@ -3,6 +3,8 @@ package com.wgplaner.auth;
 import com.wgplaner.common.httpclient.HttpClient;
 import com.wgplaner.common.util.JsonUtils;
 import com.wgplaner.config.AuthServerConfig;
+
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.springframework.http.HttpHeaders;
@@ -24,28 +26,37 @@ public class AuthServerRequester {
     try {
       String body = JsonUtils.toJsonString(Map.of("username", username, "password", password));
       Long oid = HttpClient.makeRequest(authServerConfig.getUri() + "/register/new", getHeaders(), body, Long.class);
-      if(oid == null) {
+      if (oid == null) {
         throw new RuntimeException();
       }
       return oid;
     } catch (WebClientResponseException e) {
-      throw new RuntimeException("User registration with authentication server failed. " + e.getMessage() + ". " + e.getResponseBodyAsString(), e);
+      throw new RuntimeException(
+          "User registration with authentication server failed. " + e.getMessage() + ". " + e.getResponseBodyAsString(),
+          e);
     } catch (RuntimeException e) {
       throw new RuntimeException("User registration with authentication server failed. ", e);
     }
   }
 
+  public void resetPassword(Long oid, String password) {
+    System.out.println("AUTH URL" + authServerConfig.getUri() + "/password-recovery/reset-password");
+    String body = JsonUtils.toJsonString(Map.of("oid", oid, "password", password));
+    String x = HttpClient.makeRequest(authServerConfig.getUri() + "/password-recovery/reset-password", getHeaders(), body, String.class);
+    System.out.println("XXX" + x);
+  }
+
   private MultiValueMap<String, String> getHeaders() {
-      return new LinkedMultiValueMap<>(
-              Map.of(
-                      HttpHeaders.CONTENT_TYPE,
-                      List.of(MediaType.APPLICATION_JSON_VALUE),
-                      "Authorization",
-                      List.of(
-                              "Basic "
-                                      + HttpHeaders.encodeBasicAuth(
-                                      authServerConfig.getClientId(),
-                                      authServerConfig.getClientSecret(),
-                                      null))));
+    return new LinkedMultiValueMap<>(
+        Map.of(
+            HttpHeaders.CONTENT_TYPE,
+            List.of(MediaType.APPLICATION_JSON_VALUE),
+            "Authorization",
+            List.of(
+                "Basic "
+                    + HttpHeaders.encodeBasicAuth(
+                        authServerConfig.getClientId(),
+                        authServerConfig.getClientSecret(),
+                        null))));
   }
 }
