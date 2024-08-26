@@ -57,6 +57,7 @@ public class PasswordRecoveryController {
 
     var ggg = passwordRecoveryEmailRepository.findByCode(savedEntity.getCode());
     System.out.println("GGG: " + ggg.getUserProfile() + " " + ggg.getCode());
+    //redirect to app
   }
 
   @GetMapping(path = "/validate")
