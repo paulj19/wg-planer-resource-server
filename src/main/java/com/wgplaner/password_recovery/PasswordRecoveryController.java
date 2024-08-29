@@ -9,8 +9,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.SimpleMailMessage;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -31,7 +34,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-@RestController
+@Controller
 @RequestMapping("/password-recovery")
 @RequiredArgsConstructor
 public class PasswordRecoveryController {
@@ -42,58 +45,43 @@ public class PasswordRecoveryController {
   private final AuthServerRequester authServerRequester;
 
   @PostMapping(path = "/initiate")
-  public void initiateEmail(@RequestParam(name = "email", required = true) String email) {
+  public String initiateEmail(@RequestParam(name = "email", required = true) String email) {
     UserProfile userProfile = userRepository.findByEmail(email);
     if (userProfile == null) {
       throw new EmailNotFoundException("Userprofile not found by email: " + email);
     }
     String code = generateCode();
-    System.out.println("INITIATE: " + code + userProfile);
     PasswordRecoveryEmailEntity savedEntity = passwordRecoveryEmailRepository
         .save(new PasswordRecoveryEmailEntity(userProfile, code));
-    System.out.println("SAVED: " + savedEntity.getUserProfile() + " " + savedEntity.getCode());
     SimpleMailMessage mailMsg = createMessage(userProfile, code);
     mailService.sendAsync(mailMsg, new PasswordRecoveryMailCallback(savedEntity, mailMsg, mailService));
-
-    var ggg = passwordRecoveryEmailRepository.findByCode(savedEntity.getCode());
-    System.out.println("GGG: " + ggg.getUserProfile() + " " + ggg.getCode());
-    //redirect to app
+    return "/enterCode";
   }
 
   @GetMapping(path = "/validate")
-  public UserProfileDto validateCode(@RequestParam(name = "code", required = true) String code) {
+  public String validateCode(@RequestParam(name = "code", required = true) String code, Model model) {
     PasswordRecoveryEmailEntity entity = passwordRecoveryEmailRepository.findByCode(code);
+
     if (entity == null) {
       throw new CodeNotFoundException("Code not found: " + code);
     }
     if (entity.getCreationDate().plusMinutes(20).isBefore(ZonedDateTime.now())) {
       throw new CodeExpiredException("Code expired: " + code);
     }
-    UserProfile userProfile = entity.getUserProfile();
-    return new UserProfileDto(userProfile.getId(), userProfile.getUsername(), userProfile.getEmail(),
-        userProfile.getOid(), userProfile.getAuthServer());
+    model.addAttribute("code", code);
+    return "/resetPassword";
   }
 
   @PostMapping(path = "/reset-password")
-  public void resetPassword(@RequestBody ResetPasswordDto resetPasswordDto) {
-    PasswordRecoveryEmailEntity entity = passwordRecoveryEmailRepository.findByCode(resetPasswordDto.code());
+  public String resetPassword(@RequestParam String code, @RequestParam String password) {
+    PasswordRecoveryEmailEntity entity = passwordRecoveryEmailRepository.findByCode(code);
     if (entity == null) {
-      throw new CodeNotFoundException("Code not found: " + resetPasswordDto.code());
+      throw new CodeNotFoundException("Code not found: " + code);
     }
-    var x = userRepository.findAll();
-    for (var y : x) {
-      System.out.println("USER: " + y);
-    }
-    var g = passwordRecoveryEmailRepository.findAll();
-    for (var y : g) {
-      System.out.println("RECOV: " + y.getUserProfile() + " " + y.getCode());
-    }
-    System.out.println("ENTITY" + entity.getUserProfile() + " " + resetPasswordDto.password());
-    authServerRequester.resetPassword(entity.getUserProfile().getOid(), resetPasswordDto.password());
+    authServerRequester.resetPassword(entity.getUserProfile().getOid(), password);
 
     passwordRecoveryEmailRepository.delete(entity);
-    System.out.println("Password reset");
-    // if result ok, delete code and return
+    return "/pwResetSuccess";
   }
 
   private static String generateCode() {
@@ -103,6 +91,7 @@ public class PasswordRecoveryController {
       int index = RANDOM.nextInt(samples.length());
       code.append(samples.charAt(index));
     }
+
     return code.toString();
   }
 

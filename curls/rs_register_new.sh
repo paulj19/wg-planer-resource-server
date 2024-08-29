@@ -1,6 +1,6 @@
 #curl -v https://wg-planer-resource-server.onrender.com/register/new \
 curl -v  http://localhost:8081/register/new \
-	--data-raw '{"username": "Pauloykti", "password": "Password123!", "email": "wildromer999@gmail.com", "oid":null, "authServer":"HOME_BREW"}' \
+	--data-raw '{"username": "Pauloyx", "password": "Password123!", "email": "wildromer999@gmail.com", "oid":null, "authServer":"HOME_BREW"}' \
 	-H 'content-type: application/json' \
 	    -H 'Accept-Language: en-US,en;q=0.9,de-DE;q=0.8,de;q=0.7' \
 	      -H 'Authorization: Basic d2ctcGxhbmVyOnNlY3JldA==' \

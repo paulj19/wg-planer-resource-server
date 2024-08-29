@@ -1,5 +1,5 @@
 curl -v  http://localhost:8081/password-recovery/reset-password \
-	--data-raw '{"code": "QOTV", "password": "Thisisawesome123!"}' \
+	--data-raw '{"code": "LFIX", "password": "Thisisawesome123!"}' \
 	-H 'content-type: application/json' \
 	    -H 'Accept-Language: en-US,en;q=0.9,de-DE;q=0.8,de;q=0.7' \
 	      -H 'Authorization: Basic d2ctcGxhbmVyOnNlY3JldA==' \

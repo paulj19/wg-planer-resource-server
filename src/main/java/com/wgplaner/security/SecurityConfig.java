@@ -23,7 +23,7 @@ public class SecurityConfig {
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
     http.authorizeRequests()
-        .antMatchers("/register/**", "/password-recovery/**")
+        .antMatchers("/register/**", "/password-recovery/**", "/forgot-password", "/pwResetSuccess", "/resetPassword")
         .permitAll()
         .and()
         .authorizeRequests()
@@ -40,7 +40,7 @@ public class SecurityConfig {
         .configurationSource(
             request -> {
               CorsConfiguration corsConfiguration = new CorsConfiguration();
-              corsConfiguration.setAllowedOrigins(Arrays.asList("http://127.0.0.1:19006", "http://localhost", "http://192.168.1.9:8080"));
+              corsConfiguration.setAllowedOrigins(Arrays.asList("http://127.0.0.1:19006", "http://localhost", "http://192.168.1.9:8080",  "http://192.168.1.9:8080"));
               corsConfiguration.setAllowCredentials(true);
               corsConfiguration.setAllowedMethods(
                   Arrays.asList(
